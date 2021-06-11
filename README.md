@@ -1,0 +1,2 @@
+# PlantarPressureProcess
+科研用的PlantarPressureProcess以及CNN程序
