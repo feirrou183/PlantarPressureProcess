@@ -2,6 +2,7 @@ import os
 import json
 import csv
 import numpy as np
+import random
 
 Work_Path = "F:\\PlantarPressurePredictExperiment"
 os.chdir(Work_Path)
@@ -103,7 +104,9 @@ if __name__ == '__main__':
 
     #f = GetFileIterator(dic)
     #a = f.__next__()
-    i= 0
+    randomCount = 0
+    selectFlag = False
+    randomList = [0, 1, 2, 3, 4]
 
     for eachItem in GetFileIterator(dic):
         Arr = eachItem[5]
@@ -112,14 +115,26 @@ if __name__ == '__main__':
 
         mean = Arr.mean()
         std = Arr.std()
-        Arr = (Arr - mean)/std   #标准化数据
-        i +=1
-        if(i % 5 != 0):
+        Arr = (Arr - mean) / std  # 标准化数据
+
+        randomCount += 1
+        if (randomCount % 5 == 0):  # 每5个重置一次抽取
+            selectFlag = False
+            randomList = [0, 1, 2, 3, 4]
+
+        if not selectFlag:
+            randomIndex = random.choice(randomList)
+            randomList.remove(randomIndex)
+            if (randomIndex == 0):
+                TestArr.append(Arr)
+                TestAngle.append(label)
+                selectFlag = True  # 这一轮次已经抽取了测试集
+            else:
+                TrainArr.append(Arr)
+                TrainAngle.append(label)
+        else:
             TrainArr.append(Arr)
             TrainAngle.append(label)
-        else:
-            TestArr.append(Arr)
-            TestAngle.append(label)
 
     TrainArr = np.array(TrainArr)
     TrainAngle = np.array(TrainAngle)

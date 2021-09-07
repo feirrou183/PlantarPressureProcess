@@ -4,7 +4,7 @@ import csv
 import sys
 
 #设置工作环境
-Work_Path = "/"
+Work_Path = "F:\\PlantarPressurePredictExperiment"
 os.chdir(Work_Path)
 
 def DataProcess(name):
@@ -57,7 +57,7 @@ def WriteFrames(FramesList,savePathAndName):
 
 
 if __name__ == '__main__':
-    for l in ['10','11','12']:  #3-9
+    for l in ['01','02','03','04','05','06','07','08','09','10','11','12']:  #1-12
         subject = "subject{}".format(l)
         for i in range(1, 12):  # 1-11
             print(subject)
