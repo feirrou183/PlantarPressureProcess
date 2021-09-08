@@ -58,7 +58,7 @@ def GetFileIterator(dic):
                 detailItemName = "{0}-{1}".format(item, sub_item)
                 subjectName = "subject{}".format(subject)
                 if (dic[subjectName]["ResultData"].__contains__(detailItemName)):
-                    for eachStep in Step:
+                    for eachStep in Step:#每一个特征步
                         HC, SC, HL, TO = GetKeyPoint(dic, subjectName, detailItemName, eachStep)
                         HCArr, MSArr, TOArr = GetArr(subject, detailItemName, eachStep, HC, SC, HL, TO)
                         angle,strategy =  GetLabel(dic,subjectName,detailItemName)

@@ -250,8 +250,8 @@ def DumpLabel(dicManager):
 if __name__ == '__main__':
     dicManager = DicManager()
 
-
-
+    with open("Output\\JSON\\subjectConfig6-8.json", "r",encoding= "utf-8") as f:
+        refdic = json.load(f)
 
     SubjectDic = GetSubjectDict()
     Arr = GetCsvFile("TempFile.csv").GetArr()
@@ -259,15 +259,20 @@ if __name__ == '__main__':
 
     for i in SubjectDic.keys():
         filelist = GetList(Arr,i)
-        subjectStepDic = PTL.Process(i,SubjectDic[i],filelist)
+        #subjectStepDic = PTL.Process(i,SubjectDic[i],filelist)
         #dicManager.subjectConfigDict["subject{0}".format(i)]["ResultData"] = subjectStepDic
-        dicManager.subjectConfigDict["subject{0}".format(i)]["ResultData"].update(subjectStepDic)
+        keylist = list(dicManager.subjectConfigDict["subject{0}".format(i)]["ResultData"].keys())
+        for key in keylist:
+            dicManager.subjectConfigDict["subject{0}".format(i)]["ResultData"][key]["angle"] = \
+                refdic["subject{0}".format(i)]["ResultData"][key]["angle"]
+            dicManager.subjectConfigDict["subject{0}".format(i)]["ResultData"][key]["strategy"] = \
+                refdic["subject{0}".format(i)]["ResultData"][key]["strategy"]
+
 
     dicManager.DictDump()
 
-    Export = DataExport(dicManager.subjectConfigDict,"OutPut\\OutPutValue6-11.csv")
-    Export.WriteCsv()
-
+    #Export = DataExport(dicManager.subjectConfigDict,"OutPut\\OutPutValue6-11.csv")
+    #Export.WriteCsv()
     pass
 
 
