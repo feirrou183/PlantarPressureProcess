@@ -11,7 +11,7 @@ from ProcessProgram.NeurNetWorkProcess.ProceRawDataToTensor import *
 
 #region   文件导入
 
-Work_Path = "/"
+Work_Path = "F:\\PlantarPressurePredictExperiment"
 os.chdir(Work_Path)
 
 
@@ -107,9 +107,7 @@ class CNN(nn.Module):
         )
 
 
-
-
-        self.out = nn.Linear(128 * 9 * 4, 5)
+        self.out = nn.Linear(128 * 9 * 4, 5)  #5分类
 
     def forward(self, x):
         x = self.conv1(x)
@@ -155,7 +153,7 @@ def TestNetWork(cnn):
     tempMax = 85
     if(correctRate > tempMax):
         tempMax = correctRate
-        savemodel(cnn, "tempMaxModel\\cnn_tempMax_correct{}%.pkl".format(correctRate))
+        #savemodel(cnn, "tempMaxModel\\cnn_tempMax_correct{}%.pkl".format(correctRate))
     cnn.train()
     return ("{:.0f}%".format(100. * correct / len(test_loader.dataset)))
 
@@ -194,7 +192,7 @@ print("Final:" , end= "")
 # test
 Correct = TestNetWork(cnn)
 
-savemodel(cnn,"cnn4_12_0_correct{}.pkl".format(Correct))
+savemodel(cnn,"cnn9_8_0_correct{}.pkl".format(Correct))
 
 
 
