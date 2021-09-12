@@ -122,7 +122,7 @@ class CNN(nn.Module):
 
 #保存网络
 def savemodel(model,filename_Date_correctRate):
-    torch.save(model,"ProcessProgram\\model\\{}".format(filename_Date_correctRate))
+    torch.save(model,"Pytorch\\model\\{}".format(filename_Date_correctRate))
 
 #提取网络
 def getmodel(filename_Date_correctRate):
