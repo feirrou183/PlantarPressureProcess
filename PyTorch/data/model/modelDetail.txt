@@ -16,3 +16,4 @@ cnn4_1_0_correct88%.pkl   4层   0-120   TO区间  Epoch_50   batchSize_8    LR0
 cnn4_1_1_correct91%.pkl   4层   0-90     TO区间  Epoch_50   batchSize_8    LR0.001->Dynamic(gmma = 0.1)
 cnn4_1_2_correct94%.pkl   4层   0,60,90  TO区间 Epoch_50   batchSize_8    LR0.001->Dynamic(gmma = 0.1)
 cnn4_1_3_correct97%.pkl   4层   ST-NL   TO区间  Epoch_50   batchSize_8     LR0.001->Dynamic(gmma = 0.1)
+cnn9_8_0_correct92%.pkl   3层  0-120    TO区间  Epoch_50   batchSize_8    LR0.001->Dynamic(gmma = 0.1)
