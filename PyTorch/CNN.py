@@ -135,7 +135,7 @@ def TestNetWork(cnn):
     correct = 0
     test_loss = 0
     for step, (data, target) in enumerate(test_loader):
-        data, target = Variable(data),Variable(target)
+        data, target = Variable(data).cuda(),Variable(target).cuda()
         data = data.float()
         output = cnn(data)
         # sum up batch loss
@@ -167,11 +167,17 @@ if __name__ == '__main__':
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer,step_size= 10,gamma=0.5,last_epoch= -1)  #动态调整学习率。每10轮下降一位小数点
     loss_func = nn.CrossEntropyLoss()
 
+    print("使用GPU:", torch.cuda.get_device_name(0))
+    cnn = cnn.cuda()
+    loss_func = loss_func.cuda()
+
+
+
 
     for epoch in range(1,EPOCH):
         for step,(x,y) in enumerate(train_loader):
-            b_x = Variable(x)
-            b_y = Variable(y)
+            b_x = Variable(x).cuda()
+            b_y = Variable(y).cuda()
             output = cnn(b_x)
             loss = loss_func(output,b_y)
             optimizer.zero_grad()
