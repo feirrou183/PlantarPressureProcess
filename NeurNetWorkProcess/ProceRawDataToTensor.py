@@ -117,31 +117,35 @@ if __name__ == '__main__':
         std = Arr.std()
         Arr = (Arr - mean) / std  # 标准化数据
 
-        randomCount += 1
-        if (randomCount % 5 == 0):  # 每5个重置一次抽取
-            selectFlag = False
-            randomList = [0, 1, 2, 3, 4]
-
-        if not selectFlag:
-            randomIndex = random.choice(randomList)
-            randomList.remove(randomIndex)
-            if (randomIndex == 0):
-                TestArr.append(Arr)
-                TestAngle.append(label)
-                selectFlag = True  # 这一轮次已经抽取了测试集
-            else:
-                TrainArr.append(Arr)
-                TrainAngle.append(label)
+        if(eachItem[0] == "subject04") or (eachItem[0] == "subject08"):
+            TestArr.append(Arr)
+            TestAngle.append(label)
         else:
             TrainArr.append(Arr)
             TrainAngle.append(label)
+        # randomCount += 1
+        # if (randomCount % 5 == 0):  # 每5个重置一次抽取
+        #     selectFlag = False
+        #     randomList = [0, 1, 2, 3, 4]
+        #
+        # if not selectFlag:
+        #     randomIndex = random.choice(randomList)
+        #     randomList.remove(randomIndex)
+        #     if (randomIndex == 0):
+        #         TestArr.append(Arr)
+        #         TestAngle.append(label)
+        #         selectFlag = True  # 这一轮次已经抽取了测试集
+        #     else:
+        #         TrainArr.append(Arr)
+        #         TrainAngle.append(label)
+        # else:
+        #     TrainArr.append(Arr)
+        #     TrainAngle.append(label)
 
     TrainArr = np.array(TrainArr)
     TrainAngle = np.array(TrainAngle)
     TestArr = np.array(TestArr)
     TestAngle = np.array(TestAngle)
-
-
 
 
     np.savetxt(SaveTrainDataFilePath,TrainArr,delimiter=",")

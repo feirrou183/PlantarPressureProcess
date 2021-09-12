@@ -36,9 +36,9 @@ with open(SaveTrainDataFilePath, encoding='utf-8') as path_x_train_m, \
 
 #region 预置参数
 
-BATCH_SIZE = 8
-Learn_Rate = 0.001
-EPOCH = 50
+BATCH_SIZE = 50
+Learn_Rate = 0.1
+EPOCH = 30
 tempMax = 87
 
 
@@ -79,41 +79,37 @@ class CNN(nn.Module):
                 out_channels=16,
                 kernel_size=5,
                 stride=1,
-                padding = 2,  # padding = (kernel_size -1)/2
+                padding = 2,  # padding = (kernel_size -1)/2  -> 这样图片不会变小
                 ),
-        nn.ReLU(),
-        #nn.AvgPool2d(2)
+        nn.Softmax2d(),
+        nn.MaxPool2d(2)
         )
         #endregion
         self.conv2 = nn.Sequential(
+            nn.Dropout(0.2),
             nn.Conv2d(16, 32, 5, 1, 2),
-            nn.BatchNorm2d(32, momentum=0.3),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
+            nn.Softmax2d(),
+            nn.AvgPool2d(2),
         )
 
         self.conv3 = nn.Sequential(
-            nn.BatchNorm2d(32, momentum=0.1),
-            nn.Conv2d(32,64,3,1,2),
+            nn.BatchNorm2d(32, momentum=0.2),
+            nn.Conv2d(32,64,3,1,1),
             nn.Softmax2d(),
             nn.MaxPool2d(2),
         )
 
         self.conv4 = nn.Sequential(
-            nn.BatchNorm2d(64,momentum=0.1),
-            nn.Conv2d(64,128,3,1,2),
+            nn.Conv2d(64,128,3,1,1),
             nn.Softmax2d(),
-            nn.MaxPool2d(2)
         )
-
-
-        self.out = nn.Linear(128 * 9 * 4, 5)  #5分类
+        self.out = nn.Linear(128 * 7 * 2, 5)  #5分类
 
     def forward(self, x):
-        x = self.conv1(x)
+        x = self.conv1(x)  # batch,16,30,10
         x = self.conv2(x)  # batch,32,15,5
-        x = self.conv3(x)  #  64 * 16 * 6
-        x = self.conv4(x)  # 128 * 9 * 4
+        x = self.conv3(x)  #  64 * 7 * 2
+        x = self.conv4(x)  # 128 * 7 * 2
         x = x.view(x.size(0), -1)  # (batch,32*15*5)
         output = self.out(x)
         return output
@@ -198,7 +194,7 @@ for epoch in range(1,EPOCH):
 print("Final:" , end= "")
 # test
 Correct = TestNetWork(cnn)
-
+cnn = cnn.cpu()
 savemodel(cnn,"cnn9_8_0_correct{}.pkl".format(Correct))
 
 
