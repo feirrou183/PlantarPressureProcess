@@ -33,9 +33,9 @@ def importData():
 #endregion
 
 #region 预置参数
-BATCH_SIZE = 8
+BATCH_SIZE = 16
 Learn_Rate = 0.001
-EPOCH = 30
+EPOCH = 60
 tempMax = 87
 #endregion
 
@@ -72,7 +72,7 @@ class CNN(nn.Module):
         self.conv1 = nn.Sequential(
             nn.Conv2d(
                 in_channels=1,
-                out_channels=16,
+                out_channels=64,
                 kernel_size=5,
                 stride=1,
                 padding = 2,  # padding = (kernel_size -1)/2
@@ -82,39 +82,38 @@ class CNN(nn.Module):
         )
         #endregion
         self.conv2 = nn.Sequential(
-            nn.Conv2d(16, 32, 5, 1, 2),
-            nn.BatchNorm2d(32, momentum=0.3),
+            nn.BatchNorm2d(64, momentum=0.3),
+            nn.Conv2d(64, 128, 5, 1, 2),
             nn.ReLU(),
             nn.MaxPool2d(2),
         )
 
         self.conv3 = nn.Sequential(
-            nn.BatchNorm2d(32, momentum=0.1),
-            nn.Conv2d(32,64,3,1,2),
+            nn.BatchNorm2d(128, momentum=0.1),
+            nn.Conv2d(128,256,3,1,1),
             nn.Softmax2d(),
             nn.MaxPool2d(2),
         )
 
         self.conv4 = nn.Sequential(
-            nn.BatchNorm2d(64,momentum=0.1),
-            nn.Conv2d(64,128,3,1,2),
+            nn.Dropout(0.5),
+            nn.BatchNorm2d(256,momentum=0.1),
+            nn.Conv2d(256,512,3,1,2),
             nn.Softmax2d(),
             nn.MaxPool2d(2)
         )
 
 
-        self.out = nn.Linear(128 * 9 * 4, 5)  #5分类
+        self.out = nn.Linear(512 * 8 * 3, 5)  #5分类
 
     def forward(self, x):
         x = self.conv1(x)
         x = self.conv2(x)  # batch,32,15,5
         x = self.conv3(x)  #  64 * 16 * 6
-        x = self.conv4(x)  # 128 * 9 * 4
+        x = self.conv4(x)  # 128 * 8 * 3
         x = x.view(x.size(0), -1)  # (batch,32*15*5)
         output = self.out(x)
         return output
-
-
 #endregion
 
 
@@ -164,7 +163,7 @@ if __name__ == '__main__':
     TrainFormData()
     cnn = CNN()
     optimizer = torch.optim.Adam(cnn.parameters(),lr = Learn_Rate)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer,step_size= 10,gamma=0.5,last_epoch= -1)  #动态调整学习率。每10轮下降一位小数点
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer,step_size= 20,gamma=0.5,last_epoch= -1)  #动态调整学习率。每10轮下降一位小数点
     loss_func = nn.CrossEntropyLoss()
 
     print("使用GPU:", torch.cuda.get_device_name(0))
@@ -189,15 +188,17 @@ if __name__ == '__main__':
                 print('Train Epoch: {} \t [{:4d}/{:4d} ({:.0f}%)] \t\t Loss: {:.6f}'.format(
                     epoch, step * len(x), len(train_loader.dataset),
                            100. * step / len(train_loader),loss.data),end= "\n")
-                TestNetWork(cnn)
+                #TestNetWork(cnn)
                 #print('Epoch: ', epoch, '| train loss: %.4f' % loss.data.numpy() , end= "")
+            if(step % 10000 == 0):
+                TestNetWork(cnn)
         scheduler.step()
 
     print("Final:" , end= "")
     # test
     Correct = TestNetWork(cnn)
 
-    savemodel(cnn,"cnn9_12_0_correct{}.pkl".format(Correct))
+    savemodel(cnn,"cnn9_13_4_correct{}.pkl".format(Correct))
 
 
 
