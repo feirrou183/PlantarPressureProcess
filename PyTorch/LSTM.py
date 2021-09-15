@@ -7,7 +7,15 @@ import torch.utils.data as Data
 import torch
 import sys
 import os
-from ProcessProgram.NeurNetWorkProcess.ProceRawDataToTensor import *
+
+Work_Path = "F:\\PlantarPressurePredictExperiment"
+os.chdir(Work_Path)
+global x_train,x_test,y_train,y_test,train_loader,test_loader
+
+nn.LSTM()
+#region lstm模型
+
+    
 
 
-
+#endregion
