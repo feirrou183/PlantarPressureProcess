@@ -110,7 +110,7 @@ class CNN(nn.Module):
         x = self.conv2(x)  # batch,32,15,5
         x = self.conv3(x)  #  64 * 16 * 6
         x = self.conv4(x)  # 128 * 9 * 4
-        x = x.view(x.size(0), -1)  # (batch,32*15*5)
+        x = x.view(x.size(0), -1)  # (batch,32*15*5)       #将除Batch的维度展成一维的
         output = self.out(x)
         return output
 
@@ -126,7 +126,7 @@ def savemodel(model,filename_Date_correctRate):
 
 #提取网络
 def getmodel(filename_Date_correctRate):
-    net = torch.load("Pytorch\\model\\{}".format(filename_Date_correctRate))
+    net = torch.load("ProcessProgram\\model\\{}".format(filename_Date_correctRate))
     return net
 #endregion
 

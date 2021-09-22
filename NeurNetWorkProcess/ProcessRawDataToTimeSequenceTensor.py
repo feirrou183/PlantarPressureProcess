@@ -69,7 +69,7 @@ def GetFileIterator(dic):
                         #if(angle != "0°") : continue      #不要30°和120°变化
                         for k in range(len(TOArr)-(SeleSequence-1)):   #每两帧取一个图像
                             #yield subjectName,detailItemName,angle,strategy,eachStep,HCArr,MSArr,TOArr
-                            yield subjectName, detailItemName, angle, strategy, eachStep,TOArr[k]+TOArr[k+1],isTest
+                            yield subjectName, detailItemName, angle, strategy, eachStep,np.append(TOArr[k],TOArr[k+1]),isTest
                         print(subjectName,"---",detailItemName)
 
 
@@ -111,10 +111,8 @@ if __name__ == '__main__':
 
     for eachItem in GetFileIterator(dic):
         Arr = eachItem[5]
-        for eachItem in GetFileIterator(dic):
-            Arr = eachItem[5]
-            label = int(eachItem[2].split("°")[0])
-            label = switchLabelClass(label)
+        label = int(eachItem[2].split("°")[0])
+        label = switchLabelClass(label)
 
         if(eachItem[6]):
             TestArr.append(Arr)
