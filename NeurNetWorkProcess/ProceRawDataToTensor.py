@@ -58,7 +58,8 @@ def GetFileIterator(dic):
                     for eachStep in Step:  # 每一个特征步
                         HC, SC, HL, TO = GetKeyPoint(dic, subjectName, detailItemName, eachStep)
                         HCArr, MSArr, TOArr = GetArr(subject, detailItemName, eachStep, HC, SC, HL, TO)
-                        angle, strategy = GetLabel(dic, subjectName, detailItemName)
+                        angle,strategy = GetLabel(dic,subjectName,detailItemName)
+                        if(angle == "120°") : continue      #不要120°变化
                         for k in range(len(TOArr)):
                             # isTest = True if ((sub_item == "6") or (sub_item == "9")) else False
                             yield subjectName, detailItemName, angle, strategy, eachStep, TOArr[k], isTest
