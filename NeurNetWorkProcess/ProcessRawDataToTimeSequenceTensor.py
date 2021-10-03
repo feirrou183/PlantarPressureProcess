@@ -49,12 +49,22 @@ def GetLabel(dic,subjectName,detailItemName):
     strategy = dic[subjectName]["ResultData"][detailItemName]["strategy"]
     return angle,strategy
 
-
+def DoBatchNormFun(Arr):
+    '''
+    对数据进行归一化
+    :param Arr:
+    :return:
+    '''
+    mean = Arr.mean()
+    std = Arr.std()
+    arr = (Arr - mean) / std  # 标准化数据
+    return arr
 
 
 def GetFileIterator(dic):
     randomList = [1,2,3,4,5]
     isTest = False
+    DoBatchNorm = True #是否进行归一化
     for subject in subjects:
         for item in items:
             for sub_item in sub_items:
@@ -67,9 +77,23 @@ def GetFileIterator(dic):
                         HCArr, MSArr, TOArr = GetArr(subject, detailItemName, eachStep, HC, SC, HL, TO)
                         angle,strategy =  GetLabel(dic,subjectName,detailItemName)
                         if(angle == "120°") : continue      #不要30°和120°变化
-                        for k in range(len(TOArr)-(SeleSequence-1)):   #每两帧取一个图像
+
+                        #region 归一化
+
+                        #是否进行归一化
+                        if(DoBatchNorm):
+                            #HCArr
+
+                            #MSArr
+
+                            #ToeArr
+                            for ArrIndex in range(len(TOArr)):
+                                TOArr[ArrIndex] = DoBatchNormFun(TOArr[ArrIndex])
+
+                        #endregion
+                        for k in range(len(TOArr)-(SeleSequence-1)):   #每帧取一个图像,取SeleSequence帧
                             #yield subjectName,detailItemName,angle,strategy,eachStep,HCArr,MSArr,TOArr
-                            yield subjectName, detailItemName, angle, strategy, eachStep,np.append(TOArr[k],TOArr[k+1]),isTest
+                            yield subjectName, detailItemName, angle, strategy, eachStep,np.append(np.append(TOArr[k],TOArr[k+1]),TOArr[k+2]),isTest
                         print(subjectName,"---",detailItemName)
 
 
@@ -101,7 +125,9 @@ if __name__ == '__main__':
     SaveTestDataFilePath = "Pytorch\\data\\angle\\TestData.csv"
     SaveTestLabelFilePath = "Pytorch\\data\\angle\\TestLabel.csv"
 
-    SeleSequence = 2  #每两帧取一个图像
+    SeleSequence = 3  #每两帧取一个图像
+
+
 
     dic = getDic()
     TrainArr = []
@@ -113,6 +139,10 @@ if __name__ == '__main__':
         Arr = eachItem[5]
         label = int(eachItem[2].split("°")[0])
         label = switchLabelClass(label)
+
+        mean = Arr.mean()
+        std = Arr.std()
+        Arr = (Arr - mean) / std  # 标准化数据
 
         if(eachItem[6]):
             TestArr.append(Arr)

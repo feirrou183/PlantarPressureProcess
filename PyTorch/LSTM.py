@@ -15,9 +15,9 @@ global x_train,x_test,y_train,y_test,train_loader,test_loader
 #region 预置参数
 BATCH_SIZE = 16
 Learn_Rate = 0.001
-EPOCH = 30
+EPOCH = 60
 tempMax = 87
-sequenceLen = 2         #视频序列长度
+sequenceLen = 3         #视频序列长度
 #endregion
 
 #region 文件导入
@@ -77,6 +77,7 @@ class LSTM(nn.Module):
         self.lstm = nn.LSTM(in_dim,hidden_dim,n_layer,batch_first=True)
         self.linear = nn.Linear(hidden_dim,n_class)
 
+
     #前向函数
     def forward(self, x):
         out,_ = self.lstm(x)
@@ -126,12 +127,12 @@ def TestNetWork(lstm):
 if __name__ == '__main__':
     importData()
     TrainFormData()
-    lstm = LSTM(1260,400,2,4)
+    lstm = LSTM(1260,1260,1,4)
     lstm.cuda()
 
     optimizer = torch.optim.Adam(lstm.parameters(), lr=Learn_Rate)
-    # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.5,
-    #                                             last_epoch=-1)  # 动态调整学习率。每10轮下降一位小数点
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.5,
+                                                last_epoch=-1)  # 动态调整学习率。每10轮下降一位小数点
     loss_func = nn.CrossEntropyLoss()
 
     for epoch in range(EPOCH):
@@ -149,11 +150,11 @@ if __name__ == '__main__':
                     epoch, step * len(x), len(train_loader.dataset),
                            100. * step / len(train_loader), loss.data), end="\n")
                 TestNetWork(lstm)
-        #scheduler.step()
+        scheduler.step()
 
     print("Final:", end="")
     # test
     Correct = TestNetWork(lstm)
-    savemodel(lstm, "lstm10_3_0_correct{}.pkl".format(Correct))
+    savemodel(lstm, "lstm10_3_2_correct{}.pkl".format(Correct))
 
 
