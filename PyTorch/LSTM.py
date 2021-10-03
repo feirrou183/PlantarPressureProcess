@@ -9,13 +9,14 @@ import sys
 import os
 from ProcessProgram.NeurNetWorkProcess.ProceRawDataToTensor import *
 
-
+Work_Path = "F:\\PlantarPressurePredictExperiment"
+os.chdir(Work_Path)
+global x_train,x_test,y_train,y_test,train_loader,test_loader
 #region 预置参数
-BATCH_SIZE = 8
+BATCH_SIZE = 16
 Learn_Rate = 0.001
 EPOCH = 30
 tempMax = 87
-
 sequenceLen = 2         #视频序列长度
 #endregion
 
@@ -65,29 +66,34 @@ def TrainFormData():
 
 #region lstm模型
 class LSTM(nn.Module):
-    def __init__(self):
+    def __init__(self,in_dim,hidden_dim,n_layer,n_class):
+        '''
+        :param in_dim:  进入维度
+        :param hidden_dim: 隐藏层数量
+        :param n_layer: 层数
+        :param n_class: 分类数量
+        '''
         super(LSTM,self).__init__()
-        self.batchNorm =nn.BatchNorm2d(1260, momentum=0.1)
-        self.lstm1 = nn.LSTM(1260,40,3,batch_first=True)          #输入特征1260，输出特征50, 3层隐藏层
-        self.out = nn.Linear(40,4)
+        self.lstm = nn.LSTM(in_dim,hidden_dim,n_layer,batch_first=True)
+        self.linear = nn.Linear(hidden_dim,n_class)
 
     #前向函数
     def forward(self, x):
-        #x = self.batchNorm(x)
-        x = self.lstm1(x)[0]
-        x = x.view(x.size(0), -1)  #将除Batch的维度展成一维的
-        output = self.out(x)
+        out,_ = self.lstm(x)
+        out = out[:,-1,:]
+        out = self.linear(out)
+        return out
 #endregion
 
 #region  功能函数
 
 #保存网络
 def savemodel(model,filename_Date_correctRate):
-    torch.save(model,"ProcessProgram\\model\\{}".format(filename_Date_correctRate))
+    torch.save(model,"F:\\PlantarPressurePredictExperiment\\Pytorch\\model\\{}".format(filename_Date_correctRate))
 
 #提取网络
 def getmodel(filename_Date_correctRate):
-    net = torch.load("ProcessProgram\\model\\{}".format(filename_Date_correctRate))
+    net = torch.load("F:\\PlantarPressurePredictExperiment\\Pytorch\\model\\{}".format(filename_Date_correctRate))
     return net
 #endregion
 
@@ -97,22 +103,21 @@ def TestNetWork(lstm):
     correct = 0
     test_loss = 0
     for step, (data, target) in enumerate(test_loader):
-        data, target = Variable(data),Variable(target)
-        data = data.float()
+        data, target = Variable(data).cuda(),Variable(target).cuda()
         output = lstm(data)
         # sum up batch loss
         test_loss += loss_func(output, target).item()
         # get the index of the max log-probability
         pred = torch.max(output.data, 1)[1]
-        correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+        correct += int(pred.eq(target.data.view_as(pred)).cpu().sum())
         test_loss /= len(test_loader.dataset)
-    correctRate = int(100. * correct / len(test_loader.dataset))
+    correctRate = 100. * correct / len(test_loader.dataset)
     print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),correctRate))
     tempMax = 85
-    if(correctRate > tempMax):
-        tempMax = correctRate
-        #savemodel(cnn, "tempMaxModel\\cnn_tempMax_correct{}%.pkl".format(correctRate))
+    # if(correctRate > tempMax):
+    #     tempMax = correctRate
+    #     #savemodel(cnn, "tempMaxModel\\cnn_tempMax_correct{}%.pkl".format(correctRate))
     lstm.train()
     return ("{:.0f}%".format(100. * correct / len(test_loader.dataset)))
 
@@ -121,7 +126,7 @@ def TestNetWork(lstm):
 if __name__ == '__main__':
     importData()
     TrainFormData()
-    lstm = LSTM()
+    lstm = LSTM(1260,400,2,4)
     lstm.cuda()
 
     optimizer = torch.optim.Adam(lstm.parameters(), lr=Learn_Rate)
@@ -129,10 +134,10 @@ if __name__ == '__main__':
     #                                             last_epoch=-1)  # 动态调整学习率。每10轮下降一位小数点
     loss_func = nn.CrossEntropyLoss()
 
-    for epoch in range(1,EPOCH):
+    for epoch in range(EPOCH):
         for step,(x,y) in enumerate(train_loader):
-            b_x = Variable(x)
-            b_y = Variable(y)
+            b_x = Variable(x).cuda()
+            b_y = Variable(y).cuda()
             output = lstm(b_x)
             loss = loss_func(output, b_y)
             optimizer.zero_grad()
@@ -143,11 +148,12 @@ if __name__ == '__main__':
                 print('Train Epoch: {} \t [{:4d}/{:4d} ({:.0f}%)] \t\t Loss: {:.6f}'.format(
                     epoch, step * len(x), len(train_loader.dataset),
                            100. * step / len(train_loader), loss.data), end="\n")
+                TestNetWork(lstm)
         #scheduler.step()
 
     print("Final:", end="")
     # test
     Correct = TestNetWork(lstm)
-    savemodel(lstm, "cnn9_23_0_correct{}.pkl".format(Correct))
+    savemodel(lstm, "lstm10_3_0_correct{}.pkl".format(Correct))
 
 
