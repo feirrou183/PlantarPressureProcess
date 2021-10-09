@@ -21,7 +21,7 @@ from ProcessProgram.PyTorch.LSTM import LSTM
 from ProcessProgram.PyTorch.LSTM import sequenceLen
 from ProcessProgram.PyTorch.LSTM import getmodel,BATCH_SIZE
 
-#CNN
+# CNN
 # from ProcessProgram.PyTorch.CNN import CNN
 # from ProcessProgram.PyTorch.CNN import getmodel,BATCH_SIZE
 
@@ -59,10 +59,12 @@ def TrainFormData():
     test_loader = Data.dataloader.DataLoader(dataset= test_dataset,batch_size = BATCH_SIZE ,shuffle= True)
 #endregion
 
+
 def TestNetWork(model):
     correct = 0
     correctCount = [0,0,0,0,0]      #0，30，60，90  正确数量
     TotalCount = [0,0,0,0,0]        #总数
+    ErrRect = np.zeros((5,5))
     for step, (data, target) in enumerate(test_loader):
         data, target = Variable(data).cuda(),Variable(target).cuda()
         output = model(data)
@@ -70,13 +72,17 @@ def TestNetWork(model):
         # get the index of the max log-probability
         pred = torch.max(output.data, 1)[1]
         correct += int(pred.eq(target.data.view_as(pred)).cpu().sum())
+
         for ansIndex in range(len(pred)):
-            angleIndex = target[ansIndex]
-            if(pred[ansIndex] == target[ansIndex]):
+            angleIndex = target[ansIndex]     #真值
+            predictIndex = pred[ansIndex]     #预测值
+            if(predictIndex == angleIndex):
                 correctCount[angleIndex] += 1
                 TotalCount[angleIndex] += 1
             else:
                 TotalCount[angleIndex] += 1
+                ErrRect[angleIndex][pred[ansIndex]] +=1
+
 
     correctRate = 100. * correct / len(test_loader.dataset)
     print('Accuracy: {}/{} ({:.0f}%)\n'.format(correct, len(test_loader.dataset),correctRate))
@@ -88,13 +94,17 @@ def TestNetWork(model):
                                                                                    100. * correctCount[1]/TotalCount[1],
                                                                                    100. * correctCount[2]/TotalCount[2],
                                                                                    100. * correctCount[3]/TotalCount[3]))
+    print("错误矩阵:-------------\n",ErrRect)
+
+
+
     return ("{:.0f}%".format(100. * correct / len(test_loader.dataset)))
 
 
 if __name__ == '__main__':
     importData()
     TrainFormData()
-    lstm = getmodel("lstm10_3_2_correct76%.pkl")        #放入模型
+    lstm = getmodel("lstm10_8_1_correct82%.pkl")        #放入模型
     TestNetWork(lstm)
 
     pass

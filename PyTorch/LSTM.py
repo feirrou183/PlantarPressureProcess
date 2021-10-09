@@ -15,13 +15,14 @@ global x_train,x_test,y_train,y_test,train_loader,test_loader
 #region 预置参数
 BATCH_SIZE = 16
 Learn_Rate = 0.001
-EPOCH = 60
+EPOCH = 60           #可以考虑收敛算法，计算出不再增长后跳出训练(20轮训练不增长)
 tempMax = 87
-sequenceLen = 3         #视频序列长度
+sequenceLen = 6         #视频序列长度
 #endregion
 
 #region 文件导入
 def importData():
+    print("载入模型...")
     SaveTrainDataFilePath = "Pytorch\\data\\angle\\TrainData.csv"
     SaveTrainLabelFilePath = "Pytorch\\data\\angle\\TrainLabel.csv"
     SaveTestDataFilePath = "Pytorch\\data\\angle\\TestData.csv"
@@ -41,6 +42,7 @@ def importData():
 
 #region  数据转换
 def TrainFormData():
+    print("模型转换...")
     global x_train,x_test,y_train,y_test,train_loader,test_loader
     x_train = x_train.reshape(len(x_train),sequenceLen,1260)
     x_test = x_test.reshape(len(x_test),sequenceLen,1260)
@@ -112,13 +114,13 @@ def TestNetWork(lstm):
         pred = torch.max(output.data, 1)[1]
         correct += int(pred.eq(target.data.view_as(pred)).cpu().sum())
         test_loss /= len(test_loader.dataset)
-    correctRate = 100. * correct / len(test_loader.dataset)
+    correctRate = round(100. * correct / len(test_loader.dataset),2)
     print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),correctRate))
-    tempMax = 85
-    # if(correctRate > tempMax):
-    #     tempMax = correctRate
-    #     #savemodel(cnn, "tempMaxModel\\cnn_tempMax_correct{}%.pkl".format(correctRate))
+    tempMax = 81
+    if(correctRate > tempMax):
+         tempMax = correctRate
+         savemodel(lstm, "tempMaxModel\\lstm_tempMax_correct{}%.pkl".format(correctRate))
     lstm.train()
     return ("{:.0f}%".format(100. * correct / len(test_loader.dataset)))
 
@@ -155,6 +157,6 @@ if __name__ == '__main__':
     print("Final:", end="")
     # test
     Correct = TestNetWork(lstm)
-    savemodel(lstm, "lstm10_3_2_correct{}.pkl".format(Correct))
+    savemodel(lstm, "lstm10_8_3_correct{}.pkl".format(Correct))
 
 

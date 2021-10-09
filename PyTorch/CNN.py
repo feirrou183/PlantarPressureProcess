@@ -104,13 +104,13 @@ class CNN(nn.Module):
         )
 
 
-        self.out = nn.Linear(512 * 8 * 3, 5)  #5分类
+        self.out = nn.Linear(256 * 15 * 5, 5)  #5分类
 
     def forward(self, x):
         x = self.conv1(x)
         x = self.conv2(x)  # batch,32,15,5
-        x = self.conv3(x)  #  64 * 16 * 6
-        x = self.conv4(x)  # 128 * 8 * 3
+        x = self.conv3(x)  #  256 * 15 * 5
+        #x = self.conv4(x)  #  128 * 8 * 3
         x = x.view(x.size(0), -1)  # (batch,32*15*5)
         output = self.out(x)
         return output
@@ -198,7 +198,7 @@ if __name__ == '__main__':
     # test
     Correct = TestNetWork(cnn)
 
-    savemodel(cnn,"cnn9_13_4_correct{}.pkl".format(Correct))
+    savemodel(cnn,"cnn10_9_1_correct{}.pkl".format(Correct))
 
 
 
