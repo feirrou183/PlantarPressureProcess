@@ -44,11 +44,21 @@ def GetLabel(dic, subjectName, detailItemName):
     strategy = dic[subjectName]["ResultData"][detailItemName]["strategy"]
     return angle, strategy
 
+def DoBatchNormFun(Arr):
+    '''
+    对数据进行归一化
+    :param Arr:
+    :return:
+    '''
+    mean = Arr.mean()
+    std = Arr.std()
+    arr = (Arr - mean) / std  # 标准化数据
+    return arr
+
 
 def GetFileIterator(dic):
     randomList = [1,2,3,4,5]
     isTest = False
-    DoBatchNorm = False #是否进行归一化
     for subject in subjects:
         for item in items:
             for sub_item in sub_items:
@@ -100,17 +110,15 @@ if __name__ == '__main__':
     # f = GetFileIterator(dic)
     # a = f.__next__()
     randomCount = 0
-    selectFlag = False
-    randomList = [0, 1, 2, 3, 4]
+    DoBatchNorm = False #是否进行归一化
 
     for eachItem in GetFileIterator(dic):
         Arr = eachItem[5]
         label = int(eachItem[2].split("°")[0])
         label = switchLabelClass(label)
 
-        mean = Arr.mean()
-        std = Arr.std()
-        Arr = (Arr - mean) / std  # 标准化数据
+        if(DoBatchNorm):
+            Arr = DoBatchNormFun(Arr)
 
         if (eachItem[6]):
             TestArr.append(Arr)

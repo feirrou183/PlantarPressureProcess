@@ -139,7 +139,7 @@ def TestNetWork(cnn):
     correct = 0
     test_loss = 0
     for step, (data, target) in enumerate(test_loader):
-        data, target = Variable(data),Variable(target)
+        data, target = Variable(data).cuda(),Variable(target).cuda()
         data = data.float()
         output = cnn(data)
         # sum up batch loss
@@ -202,4 +202,4 @@ if __name__ == '__main__':
     # test
     Correct = TestNetWork(cnn)
 
-    savemodel(cnn, "cnn10_12_0_correct{}.pkl".format(Correct))
+    savemodel(cnn, "resNetEt10_12_0_correct{}.pkl".format(Correct))
