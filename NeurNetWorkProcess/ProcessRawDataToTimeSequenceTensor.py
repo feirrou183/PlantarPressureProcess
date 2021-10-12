@@ -68,7 +68,7 @@ def GetFileIterator(dic):
     for subject in subjects:
         for item in items:
             for sub_item in sub_items:
-                isTest = True if(random.choice(randomList) == 1) else False
+                isTest = True if(random.choice(randomList) == 1) else False           #独立样本
                 detailItemName = "{0}-{1}".format(item, sub_item)
                 subjectName = "subject{}".format(subject)
                 if (dic[subjectName]["ResultData"].__contains__(detailItemName)):
@@ -79,7 +79,6 @@ def GetFileIterator(dic):
                         if(angle == "120°") : continue      #不要30°和120°变化
 
                         #region 归一化
-
                         #是否进行归一化
                         if(DoBatchNorm):
                             #HCArr
@@ -130,8 +129,6 @@ if __name__ == '__main__':
 
     SeleSequence = 10  #每两帧取一个图像
 
-
-
     dic = getDic()
     TrainArr = []
     TrainAngle = []
@@ -142,10 +139,6 @@ if __name__ == '__main__':
         Arr = eachItem[5]
         label = int(eachItem[2].split("°")[0])
         label = switchLabelClass(label)
-
-        mean = Arr.mean()
-        std = Arr.std()
-        Arr = (Arr - mean) / std  # 标准化数据
 
         if(eachItem[6]):
             TestArr.append(Arr)

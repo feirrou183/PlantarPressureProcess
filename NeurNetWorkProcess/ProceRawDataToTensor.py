@@ -46,14 +46,15 @@ def GetLabel(dic, subjectName, detailItemName):
 
 
 def GetFileIterator(dic):
+    randomList = [1,2,3,4,5]
     isTest = False
-    chooseList = [1, 2, 3, 4, 5]
+    DoBatchNorm = False #是否进行归一化
     for subject in subjects:
         for item in items:
             for sub_item in sub_items:
                 detailItemName = "{0}-{1}".format(item, sub_item)
                 subjectName = "subject{}".format(subject)
-                isTest = True if (random.choice(chooseList) == 1) else False
+                isTest = True if (random.choice(randomList) == 1) else False
                 if (dic[subjectName]["ResultData"].__contains__(detailItemName)):
                     for eachStep in Step:  # 每一个特征步
                         HC, SC, HL, TO = GetKeyPoint(dic, subjectName, detailItemName, eachStep)
