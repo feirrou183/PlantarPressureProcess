@@ -16,14 +16,19 @@ Work_Path = "F:\\PlantarPressurePredictExperiment"
 os.chdir(Work_Path)
 
 #region ModelImport
-#LSTM
-from ProcessProgram.PyTorch.LSTM import LSTM
-from ProcessProgram.PyTorch.LSTM import sequenceLen
-from ProcessProgram.PyTorch.LSTM import getmodel,BATCH_SIZE
+# # LSTM
+# from ProcessProgram.PyTorch.LSTM import LSTM
+# from ProcessProgram.PyTorch.LSTM import sequenceLen
+# from ProcessProgram.PyTorch.LSTM import getmodel,BATCH_SIZE
 
 # CNN
 # from ProcessProgram.PyTorch.CNN import CNN
 # from ProcessProgram.PyTorch.CNN import getmodel,BATCH_SIZE
+
+# # ResNet18
+# from ProcessProgram.PyTorch.ResNet18 import *
+# from ProcessProgram.PyTorch.ResNet18 import getmodel,BATCH_SIZE
+
 
 #endregion
 
@@ -45,9 +50,9 @@ def importData():
 def TrainFormData():
     global x_test,y_test,test_loader
     #LSTM RESHAPE
-    x_test = x_test.reshape(len(x_test),sequenceLen,1260)
-    #CNN RESHAPE
-    # x_test = x_test.reshape(len(x_test),1,60,21)
+    # x_test = x_test.reshape(len(x_test),sequenceLen,1260)
+    #CNN /Resnet RESHAPE
+    x_test = x_test.reshape(len(x_test),1,60,21)
 
     x_test = torch.from_numpy(x_test)
     y_test = torch.from_numpy(y_test)
@@ -90,10 +95,10 @@ def TestNetWork(model):
                                                                   correctCount[1],TotalCount[1],
                                                                   correctCount[2],TotalCount[2],
                                                                   correctCount[3],TotalCount[3],))
-    print("angelAccuracy：0°:{:.2f}%  30°:{:.2f}%  60°:{:.2f}%  90°:{:.2f}%".format(100. * correctCount[0]/TotalCount[0],
+    print("angelAccuracy：0°:{:.2f}%  30°:{:.2f}%  60°:{:.2f}%  90°:{:.2f}% ".format(100. * correctCount[0]/TotalCount[0],
                                                                                    100. * correctCount[1]/TotalCount[1],
                                                                                    100. * correctCount[2]/TotalCount[2],
-                                                                                   100. * correctCount[3]/TotalCount[3]))
+                                                                                   100. * correctCount[3]/TotalCount[3],))
     print("错误矩阵:-------------\n",ErrRect)
 
 
@@ -104,7 +109,7 @@ def TestNetWork(model):
 if __name__ == '__main__':
     importData()
     TrainFormData()
-    lstm = getmodel("lstm10_8_1_correct82%.pkl")        #放入模型
-    TestNetWork(lstm)
+    model = getmodel("resNetET10_25_1_correct88%.pkl")        #放入模型
+    TestNetWork(model)
 
     pass

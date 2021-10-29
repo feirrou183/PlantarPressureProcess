@@ -7,7 +7,9 @@ import torch.utils.data as Data
 import torch
 import sys
 import os
-from ProcessProgram.NeurNetWorkProcess.ProceRawDataToTensor import *
+
+import LSTM
+import ResNet18
 
 Work_Path = "F:\\PlantarPressurePredictExperiment"
 os.chdir(Work_Path)
@@ -16,9 +18,12 @@ global x_train,x_test,y_train,y_test,train_loader,test_loader
 #region 预置参数
 BATCH_SIZE = 16
 Learn_Rate = 0.001
-EPOCH = 30
+EPOCH = 60           #可以考虑收敛算法，计算出不再增长后跳出训练(20轮训练不增长)
 tempMax = 87
+sequenceLen = 6         #视频序列长度
 #endregion
+
+
 
 #region 文件导入
 def importData():
@@ -39,12 +44,12 @@ def importData():
         y_test = np.loadtxt(path_y_test_m,dtype = int, delimiter=",")
 #endregion
 
-
 #region  数据转换
 def TrainFormData():
+    print("模型转换...")
     global x_train,x_test,y_train,y_test,train_loader,test_loader
-    x_train = x_train.reshape(len(x_train),1,60,21)
-    x_test = x_test.reshape(len(x_test),1,60,21)
+    x_train = x_train.reshape(len(x_train),sequenceLen,1,60,21)
+    x_test = x_test.reshape(len(x_test),sequenceLen,1,60,21)
 
     x_train = torch.from_numpy(x_train)
     x_test = torch.from_numpy(x_test)
@@ -65,7 +70,8 @@ def TrainFormData():
     test_loader = Data.dataloader.DataLoader(dataset= test_dataset,batch_size = BATCH_SIZE ,shuffle= True)
 #endregion
 
-#region  resNet18
+
+#region resNet18
 class RestNetBasicBlock(nn.Module):
     def __init__(self, in_channels, out_channels, stride):
         super(RestNetBasicBlock, self).__init__()
@@ -126,6 +132,7 @@ class RestNet18(nn.Module):
 
 
     def forward(self, x):
+
         out = self.conv1(x)
         out = self.maxpool(out)
         out = self.layer1(out)
@@ -133,64 +140,79 @@ class RestNet18(nn.Module):
         out = self.layer3(out)
         out = self.layer4(out)
         out = self.avgpool(out)
-        out = out.reshape(x.shape[0], -1)
-        out = self.fc(out)
-        return out
+        return out.squeeze()
+
 #endregion
 
 
-def TestNetWork(cnn):
-    cnn.eval()
+#region 融合模型
+class MultiModule(nn.Module):
+    def __init__(self):
+        super(MultiModule, self).__init__()
+        self.resNet18 = RestNet18()
+        self.lstm = LSTM.LSTM(512,1260,1,4)
+        self.FeatureArray = np.zeros((sequenceLen,512))
+
+    def resNetCalculate(self,x):
+        out0 = self.resNet18(x[:, 0])
+        out1 = self.resNet18(x[:, 1])
+        out2 = self.resNet18(x[:, 2])
+        out3 = self.resNet18(x[:, 3])
+        out4 = self.resNet18(x[:, 4])
+        out5 = self.resNet18(x[:, 5])
+        out = torch.stack([out0, out1, out2, out3, out4, out5], dim=1)
+        return out
+
+
+
+    def forward(self,x):
+        out = self.resNetCalculate(x)
+        out = self.lstm(out)
+        return out
+#endregion
+
+def TestNetWork(lstm):
+    lstm.eval()
     correct = 0
     test_loss = 0
-    tempMax = 86
+    tempMax = 80
     for step, (data, target) in enumerate(test_loader):
         data, target = Variable(data).cuda(),Variable(target).cuda()
-        data = data.float()
-        output = cnn(data)
+        output = lstm(data)
         # sum up batch loss
         test_loss += loss_func(output, target).item()
         # get the index of the max log-probability
         pred = torch.max(output.data, 1)[1]
-        correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+        correct += int(pred.eq(target.data.view_as(pred)).cpu().sum())
         test_loss /= len(test_loader.dataset)
-    correctRate = int(100. * correct / len(test_loader.dataset))
+    correctRate = round(100. * correct / len(test_loader.dataset),2)
     print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),correctRate))
     if(correctRate > tempMax):
-        tempMax = correctRate
-        savemodel(cnn, "tempMaxModel\\resNetET_tempMax_correct{}%.pkl".format(correctRate))
-    cnn.train()
+         tempMax = correctRate
+         LSTM.savemodel(lstm, "tempMaxModel\\lstm_tempMax_correct{}%.pkl".format(correctRate))
+    lstm.train()
     return ("{:.0f}%".format(100. * correct / len(test_loader.dataset)))
 
-#region  功能函数
 
-#保存网络
-def savemodel(model,filename_Date_correctRate):
-    torch.save(model,"Pytorch\\model\\{}".format(filename_Date_correctRate))
-
-#提取网络
-def getmodel(filename_Date_correctRate):
-    net = torch.load("Pytorch\\model\\{}".format(filename_Date_correctRate))
-    return net
-#endregion
 
 if __name__ == '__main__':
+
     importData()
     TrainFormData()
-    cnn = RestNet18()
-    cnn.cuda()
-    optimizer = torch.optim.Adam(cnn.parameters(), lr=Learn_Rate)
+    multiModule = MultiModule()
+    multiModule.cuda()
+
+    optimizer = torch.optim.Adam(multiModule.parameters(), lr=Learn_Rate)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.5,
                                                 last_epoch=-1)  # 动态调整学习率。每10轮下降一位小数点
     loss_func = nn.CrossEntropyLoss()
-    loss_func = loss_func.cuda()
 
-    for epoch in range(1, EPOCH):
-        for step, (x, y) in enumerate(train_loader):
+    for epoch in range(EPOCH):
+        for step,(x,y) in enumerate(train_loader):
             b_x = Variable(x).cuda()
             b_y = Variable(y).cuda()
-            output = cnn(b_x)
+            output = multiModule(b_x)
             loss = loss_func(output, b_y)
             optimizer.zero_grad()
             loss.backward()
@@ -200,12 +222,13 @@ if __name__ == '__main__':
                 print('Train Epoch: {} \t [{:4d}/{:4d} ({:.0f}%)] \t\t Loss: {:.6f}'.format(
                     epoch, step * len(x), len(train_loader.dataset),
                            100. * step / len(train_loader), loss.data), end="\n")
-                TestNetWork(cnn)
-                # print('Epoch: ', epoch, '| train loss: %.4f' % loss.data.numpy() , end= "")
+                TestNetWork(multiModule)
         scheduler.step()
 
     print("Final:", end="")
     # test
-    Correct = TestNetWork(cnn)
+    Correct = TestNetWork(multiModule)
+    LSTM.savemodel(multiModule, "resPlusLstm10_27_0_correct{}.pkl".format(Correct))
 
-    savemodel(cnn, "resNetET10_25_1_correct{}.pkl".format(Correct))
+
+

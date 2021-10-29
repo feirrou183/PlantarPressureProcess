@@ -35,7 +35,7 @@ def importData():
 #region 预置参数
 BATCH_SIZE = 16
 Learn_Rate = 0.001
-EPOCH = 60
+EPOCH = 30
 tempMax = 87
 #endregion
 

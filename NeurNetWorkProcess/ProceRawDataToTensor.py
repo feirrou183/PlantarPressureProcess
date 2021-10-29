@@ -64,7 +64,7 @@ def GetFileIterator(dic):
             for sub_item in sub_items:
                 detailItemName = "{0}-{1}".format(item, sub_item)
                 subjectName = "subject{}".format(subject)
-                isTest = True if (random.choice(randomList) == 1) else False
+                # isTest = True if (random.choice(randomList) == 1) else False
                 if (dic[subjectName]["ResultData"].__contains__(detailItemName)):
                     for eachStep in Step:  # 每一个特征步
                         HC, SC, HL, TO = GetKeyPoint(dic, subjectName, detailItemName, eachStep)
@@ -72,7 +72,7 @@ def GetFileIterator(dic):
                         angle,strategy = GetLabel(dic,subjectName,detailItemName)
                         if(angle == "120°") : continue      #不要120°变化
                         for k in range(len(TOArr)):
-                            # isTest = True if ((sub_item == "6") or (sub_item == "9")) else False
+                            isTest = True if (random.choice(randomList) == 1) else False
                             yield subjectName, detailItemName, angle, strategy, eachStep, TOArr[k], isTest
                         print(subjectName, "---", detailItemName)
 
@@ -110,7 +110,7 @@ if __name__ == '__main__':
     # f = GetFileIterator(dic)
     # a = f.__next__()
     randomCount = 0
-    DoBatchNorm = False #是否进行归一化
+    DoBatchNorm = True #是否进行归一化
 
     for eachItem in GetFileIterator(dic):
         Arr = eachItem[5]

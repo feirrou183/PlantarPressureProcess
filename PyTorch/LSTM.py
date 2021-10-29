@@ -117,7 +117,7 @@ def TestNetWork(lstm):
     correctRate = round(100. * correct / len(test_loader.dataset),2)
     print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),correctRate))
-    tempMax = 81
+    tempMax = 80
     if(correctRate > tempMax):
          tempMax = correctRate
          savemodel(lstm, "tempMaxModel\\lstm_tempMax_correct{}%.pkl".format(correctRate))
@@ -157,6 +157,6 @@ if __name__ == '__main__':
     print("Final:", end="")
     # test
     Correct = TestNetWork(lstm)
-    savemodel(lstm, "lstm10_8_3_correct{}.pkl".format(Correct))
+    savemodel(lstm, "lstm10_25_0_correct{}.pkl".format(Correct))
 
 

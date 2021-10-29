@@ -64,7 +64,7 @@ def DoBatchNormFun(Arr):
 def GetFileIterator(dic):
     randomList = [1,2,3,4,5]
     isTest = False
-    DoBatchNorm = False #是否进行归一化
+    DoBatchNorm = True #是否进行归一化
     for subject in subjects:
         for item in items:
             for sub_item in sub_items:
@@ -93,8 +93,8 @@ def GetFileIterator(dic):
                             # isTest = True if (random.choice(randomList) == 1) else False   #常规样本
                             returnList = np.append(np.append(TOArr[k],TOArr[k+1]),np.append(TOArr[k+2],TOArr[k+3]))
                             returnList = np.append(returnList,np.append(TOArr[k+4],TOArr[k+5]))
-                            returnList = np.append(returnList,np.append(TOArr[k+6],TOArr[k+7]))
-                            returnList = np.append(returnList, np.append(TOArr[k + 8], TOArr[k + 9]))
+                            #returnList = np.append(returnList,np.append(TOArr[k+6],TOArr[k+7]))
+                            #returnList = np.append(returnList, np.append(TOArr[k + 8], TOArr[k + 9]))
                             yield subjectName, detailItemName, angle, strategy, eachStep,returnList,isTest
                         print(subjectName,"---",detailItemName)
 
@@ -127,7 +127,7 @@ if __name__ == '__main__':
     SaveTestDataFilePath = "Pytorch\\data\\angle\\TestData.csv"
     SaveTestLabelFilePath = "Pytorch\\data\\angle\\TestLabel.csv"
 
-    SeleSequence = 10  #每两帧取一个图像
+    SeleSequence = 6  #每两帧取一个图像
 
     dic = getDic()
     TrainArr = []
