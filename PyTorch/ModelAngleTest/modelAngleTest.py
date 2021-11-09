@@ -17,9 +17,9 @@ os.chdir(Work_Path)
 
 #region ModelImport
 # # LSTM
-# from ProcessProgram.PyTorch.LSTM import LSTM
-# from ProcessProgram.PyTorch.LSTM import sequenceLen
-# from ProcessProgram.PyTorch.LSTM import getmodel,BATCH_SIZE
+from ProcessProgram.PyTorch.LSTM import LSTM
+from ProcessProgram.PyTorch.LSTM import sequenceLen
+from ProcessProgram.PyTorch.LSTM import getmodel,BATCH_SIZE
 
 # CNN
 # from ProcessProgram.PyTorch.CNN import CNN
@@ -50,9 +50,9 @@ def importData():
 def TrainFormData():
     global x_test,y_test,test_loader
     #LSTM RESHAPE
-    # x_test = x_test.reshape(len(x_test),sequenceLen,1260)
+    x_test = x_test.reshape(len(x_test),sequenceLen,1260)
     #CNN /Resnet RESHAPE
-    x_test = x_test.reshape(len(x_test),1,60,21)
+    # x_test = x_test.reshape(len(x_test),1,60,21)
 
     x_test = torch.from_numpy(x_test)
     y_test = torch.from_numpy(y_test)
@@ -109,7 +109,7 @@ def TestNetWork(model):
 if __name__ == '__main__':
     importData()
     TrainFormData()
-    model = getmodel("resNetET10_25_1_correct88%.pkl")        #放入模型
+    model = getmodel("lstm11_2_0_correct81%.pkl")        #放入模型
     TestNetWork(model)
 
     pass

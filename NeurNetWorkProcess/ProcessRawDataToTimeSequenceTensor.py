@@ -66,9 +66,10 @@ def GetFileIterator(dic):
     isTest = False
     DoBatchNorm = True #是否进行归一化
     for subject in subjects:
+        isTest = True if(subject == "05" or subject =="11") else False
         for item in items:
             for sub_item in sub_items:
-                isTest = True if(random.choice(randomList) == 1) else False           #独立样本
+                # isTest = True if(random.choice(randomList) == 1) else False           #独立样本
                 detailItemName = "{0}-{1}".format(item, sub_item)
                 subjectName = "subject{}".format(subject)
                 if (dic[subjectName]["ResultData"].__contains__(detailItemName)):

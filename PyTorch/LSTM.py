@@ -15,8 +15,7 @@ global x_train,x_test,y_train,y_test,train_loader,test_loader
 #region 预置参数
 BATCH_SIZE = 16
 Learn_Rate = 0.001
-EPOCH = 60           #可以考虑收敛算法，计算出不再增长后跳出训练(20轮训练不增长)
-tempMax = 87
+EPOCH = 300           #可以考虑收敛算法，计算出不再增长后跳出训练(20轮训练不增长)
 sequenceLen = 6         #视频序列长度
 #endregion
 
@@ -78,6 +77,7 @@ class LSTM(nn.Module):
         super(LSTM,self).__init__()
         self.lstm = nn.LSTM(in_dim,hidden_dim,n_layer,batch_first=True)
         self.linear = nn.Linear(hidden_dim,n_class)
+        self.softmax = nn.Softmax(1)
 
 
     #前向函数
@@ -85,6 +85,7 @@ class LSTM(nn.Module):
         out,_ = self.lstm(x)
         out = out[:,-1,:]
         out = self.linear(out)
+        # out = self.softmax(out)
         return out
 #endregion
 
@@ -105,6 +106,7 @@ def TestNetWork(lstm):
     lstm.eval()
     correct = 0
     test_loss = 0
+    tempMax = 80
     for step, (data, target) in enumerate(test_loader):
         data, target = Variable(data).cuda(),Variable(target).cuda()
         output = lstm(data)
@@ -117,7 +119,6 @@ def TestNetWork(lstm):
     correctRate = round(100. * correct / len(test_loader.dataset),2)
     print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),correctRate))
-    tempMax = 80
     if(correctRate > tempMax):
          tempMax = correctRate
          savemodel(lstm, "tempMaxModel\\lstm_tempMax_correct{}%.pkl".format(correctRate))
@@ -129,13 +130,14 @@ def TestNetWork(lstm):
 if __name__ == '__main__':
     importData()
     TrainFormData()
-    lstm = LSTM(1260,1260,1,4)
+    lstm = LSTM(1260,40,2,4)
     lstm.cuda()
 
     optimizer = torch.optim.Adam(lstm.parameters(), lr=Learn_Rate)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.5,
                                                 last_epoch=-1)  # 动态调整学习率。每10轮下降一位小数点
-    loss_func = nn.CrossEntropyLoss()
+    # loss_func = nn.CrossEntropyLoss()  #该函数自带Softmax,无需再手动添加
+    loss_func = nn.MultiMarginLoss()
 
     for epoch in range(EPOCH):
         for step,(x,y) in enumerate(train_loader):
@@ -157,6 +159,6 @@ if __name__ == '__main__':
     print("Final:", end="")
     # test
     Correct = TestNetWork(lstm)
-    savemodel(lstm, "lstm10_25_0_correct{}.pkl".format(Correct))
+    savemodel(lstm, "lstm11_5_0_correct{}.pkl".format(Correct))
 
 
