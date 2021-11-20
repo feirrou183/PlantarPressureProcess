@@ -16,22 +16,26 @@ import datetime
 Work_Path = "F:\\PlantarPressurePredictExperiment"
 os.chdir(Work_Path)
 
-#region ModelImport
-# # LSTM
-from ProcessProgram.PyTorch.LSTM import LSTM
-from ProcessProgram.PyTorch.LSTM import sequenceLen
-from ProcessProgram.PyTorch.LSTM import getmodel,BATCH_SIZE
+# region ModelImport
+# 选择网络
+NetWorkChoose = "ResNet18"
 
-# CNN
-# from ProcessProgram.PyTorch.CNN import CNN
-# from ProcessProgram.PyTorch.CNN import getmodel,BATCH_SIZE
+if (NetWorkChoose == "LSTM"):
+    # LSTM
+    from ProcessProgram.PyTorch.LSTM import LSTM
+    from ProcessProgram.PyTorch.LSTM import sequenceLen
+    from ProcessProgram.PyTorch.LSTM import getmodel, BATCH_SIZE
+elif (NetWorkChoose == "CNN"):
+    # CNN
+    from ProcessProgram.PyTorch.CNN import CNN
+    from ProcessProgram.PyTorch.CNN import getmodel, BATCH_SIZE
 
-# # ResNet18
-# from ProcessProgram.PyTorch.ResNet18 import *
-# from ProcessProgram.PyTorch.ResNet18 import getmodel,BATCH_SIZE
+elif (NetWorkChoose == "ResNet18"):
+    # ResNet18
+    from ProcessProgram.PyTorch.ResNet18 import *
+    from ProcessProgram.PyTorch.ResNet18 import getmodel, BATCH_SIZE
+# endregion
 
-
-#endregion
 
 global x_test,y_test,test_loader
 
@@ -51,9 +55,11 @@ def importData():
 def TrainFormData():
     global x_test,y_test,test_loader
     #LSTM RESHAPE
-    x_test = x_test.reshape(len(x_test),sequenceLen,1260)
-    #CNN /Resnet RESHAPE
-    # x_test = x_test.reshape(len(x_test),1,60,21)
+    if(NetWorkChoose == "LSTM"):
+        x_test = x_test.reshape(len(x_test), sequenceLen, 1260)
+    # CNN /Resnet RESHAPE
+    else:
+        x_test = x_test.reshape(len(x_test), 1, 60, 21)
 
     x_test = torch.from_numpy(x_test)
     y_test = torch.from_numpy(y_test)
