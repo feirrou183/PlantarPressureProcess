@@ -11,11 +11,7 @@ import cv2 as cv
 Work_Path = "F:\\PlantarPressurePredictExperiment"
 os.chdir(Work_Path)
 
-#subject 03
-#60°  683-695   1-1
-#90°  585-597   2-4
-#0°   1250-1262   4-1
-#30°---> Error
+
 
 def drawTrail(subject,detailItemName,Index,End):
     start = Index
