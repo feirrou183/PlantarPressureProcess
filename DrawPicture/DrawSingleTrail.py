@@ -11,14 +11,19 @@ import cv2 as cv
 Work_Path = "F:\\PlantarPressurePredictExperiment"
 os.chdir(Work_Path)
 
+#subject 03
+#60°  683-695   1-1
+#90°  585-597   2-4
+#0°   1250-1262   4-1
+#30°---> Error
 
 def drawTrail(subject,detailItemName,Index,End):
-    start = 669
-    end = 681
+    start = Index
+    end = End
     plt.style.use("ggplot")
     cmap = cm.get_cmap('jet')
     plt.rcParams["axes.grid"] = False
-    HLArr = GetArr("subject03", "5-1", start, end)
+    HLArr = GetArr(subject, detailItemName, start, end)
     plt.figure()
 
     for i in range(end-start):
